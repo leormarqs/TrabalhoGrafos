@@ -1,5 +1,9 @@
 module Main where
 
+import Graph.Parse
+import Graph.Graph
+
 main :: IO ()
 main = do
-  return ()
+  g <- parseGraph "./src/Graph/grafo.txt"
+  print g
