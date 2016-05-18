@@ -26,3 +26,6 @@ executable TrabalhoGrafos
   main-is:             Main.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7
+  other-modules:
+                Graph.Parse
+                Graph.Graph
