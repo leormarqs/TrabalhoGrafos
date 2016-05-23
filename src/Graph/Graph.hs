@@ -21,7 +21,7 @@ data Edge = Edge {
 
 --Exibition of edges
 instance Show Edge where
-  show (Edge l n v) = show (n,v)
+  show (Edge l (s:t:[]) v) = " " ++ show s ++ "-(" ++ show v ++ ")-" ++ show t ++ " "
 
 --Order of edges
 instance Ord Edge where

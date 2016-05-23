@@ -5,23 +5,23 @@ import Graph.Graph
 
 
 spanningTree :: Graph -> Graph
-spanningTree g = spanning inRegion outRegion es (Graph n [])
+spanningTree g = spanning close open es (Graph n [])
   where
-    inRegion  = [n']
-    outRegion = ns
+    close  = [n']
+    open = ns
     n@(n':ns) = getNodes g
     es@(e:_)  = getEdges g
 
 
 spanning :: [NodeId] -> [NodeId] -> [Edge] -> Graph -> Graph
 spanning    _        []       _   graph = graph
-spanning inRegion outRegion edges graph = do
-  let e = sort $ inOutEdges inRegion outRegion edges
+spanning close open edges graph = do
+  let e = sort $ inOutEdges close open edges
       (s:t:_) = nodesOf (head e)
 
-      (i,o)   = if elem s inRegion
-                then (t:inRegion , delete t outRegion)
-                else (s:inRegion , delete s outRegion)
+      (i,o)   = if elem s close
+                then (t:close , delete t open)
+                else (s:close , delete s open)
 
   if null e
     then error "Disconnected Graph"
@@ -29,18 +29,14 @@ spanning inRegion outRegion edges graph = do
          
   
 inOutEdges :: [NodeId] -> [NodeId] -> [Edge] -> [Edge]
-inOutEdges    []        _       _   = []
-inOutEdges inRegion outRegion edges = do
-  let
-    (n:ns)     = inRegion
-    es         = incidentEdges n (Graph inRegion edges)
-    es'        = filter (\x -> isInOut x inRegion outRegion) es
+inOutEdges    []          _       _   = []
+inOutEdges close@(n:ns)  open   edges = do
+  let es     = incidentEdges n (Graph close edges)
+      es'    = filter (\x -> isInOut x close open) es
+        
+      isInOut :: Edge -> [NodeId] -> [NodeId] -> Bool
+      isInOut (Edge _ (s:t:_) _) i o =
+        ((elem s i) && (elem t o)) ||
+        ((elem s o) && (elem t i))
       
-    isInOut :: Edge -> [NodeId] -> [NodeId] -> Bool
-    isInOut (Edge _ (s:t:_) _) i o =
-      ((elem s i) && (elem t o)) ||
-      ((elem s o) && (elem t i))
-  
-  if null es'
-    then inOutEdges ns outRegion edges
-    else es' ++ inOutEdges ns outRegion edges
+  es' ++ inOutEdges ns open edges
