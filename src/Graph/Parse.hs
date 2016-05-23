@@ -15,7 +15,7 @@ txtDigraph txt= do
         s = read $ arch !! 0 :: Int
         t = read $ arch !! 1 :: Int
         v = read $ arch !! 2 :: Float   
-        g = insertArch (l,s,t,v) digraph
+        g = newArch (l,s,t,v) digraph
 
     --Spliting file in relevant binds
     (n:(e:archs)) = lines txt

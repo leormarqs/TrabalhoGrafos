@@ -30,3 +30,7 @@ executable TrabalhoGrafos
   other-modules:
                 Graph.Parse
                 Graph.Graph
+                Graph.Digraph
+                Graph.SpanningTree
+
+                
