@@ -21,7 +21,7 @@ data Arch = Arch {
 
 --Exibition of archs
 instance Show Arch where
-  show (Arch n s t v) = " " ++ show s ++ " -(" ++ show v ++ ")-> " ++ show t ++ " "
+  show (Arch n s t v) = " " ++ show s ++ "-(" ++ show v ++ ")->" ++ show t ++ " "
 
 --Ordering of archs
 instance Ord Arch where
