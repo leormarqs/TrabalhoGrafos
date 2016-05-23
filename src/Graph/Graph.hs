@@ -13,10 +13,11 @@ type EdgeId = Int
 
 --Data type for edges
 data Edge = Edge {
-                    lbl :: EdgeId,
-                    nds :: [NodeId],
-                    val :: Float
+                    label  :: EdgeId,
+                    nodes' :: [NodeId],
+                    weight :: Float
                   }
+
 
 --Exibition of edges
 instance Show Edge where
@@ -61,24 +62,24 @@ insertNode :: NodeId -> Graph -> Graph
 insertNode n graph =
   if elem n ns then graph else Graph (sort $ n:ns) es
   where
-    ns = nodes graph
-    es = edges graph
+    ns = getNodes graph
+    es = getEdges graph
 
 --insert a existant edge in a graph
 insertEdge :: Edge -> Graph -> Graph
 insertEdge e graph =
   if elem e es then graph else Graph ns (sort $ e:es)
   where
-    ns  = nodes graph
-    es  = edges graph
+    ns  = getNodes graph
+    es  = getEdges graph
 
 --insert a new edge in a graph
 newEdge :: (EdgeId, NodeId, NodeId, Float) -> Graph -> Graph
 newEdge (l,s,t,v) graph =
   if elem e es then graph else Graph ns (sort $ e:es)
   where
-    ns  = nodes graph
-    es  = edges graph
+    ns  = getNodes graph
+    es  = getEdges graph
     e   = Edge l (sort $ [s,t]) v
 
 --remove a node and edges connected to it from a graph
@@ -86,13 +87,13 @@ removeNode :: NodeId -> Graph -> Graph
 removeNode n (Graph ns es) = Graph ns' es'
   where
     ns' = filter (n /=) ns
-    es' = filter (\x -> not $ elem n (nds x)) es
+    es' = filter (\x -> not $ elem n (nodesOf x)) es
 
 --remove a edge from a graph
 removeEdge :: EdgeId -> Graph -> Graph
 removeEdge e (Graph ns es) = Graph ns es'
   where
-    es' = filter (\x -> e /= lbl x) es
+    es' = filter (\x -> e /= labelOf x) es
 
 --remove parallel edges of a graph (keep the edge with lower value)
 removeParallel :: Graph -> Graph
@@ -105,27 +106,34 @@ removeParallel (Graph n es) = Graph n (sort es')
 
 
 ---------------------------------------------------------------------------------------
+--get Nodes from a graph
 getNodes :: Graph -> [NodeId]
-getNodes g = if null n
-             then error "Empty Nodes Graph"
-             else sort $ n
-  where
-    n = nodes g
+getNodes (Graph [] _) = error "Empty Nodes Graph"
+getNodes (Graph n  _) = sort n
 
+--get Edges from a graph
 getEdges :: Graph -> [Edge]
-getEdges g = sort $ edges g
+getEdges (Graph _ e) = sort e
 
+--get the label of a edge
+labelOf :: Edge -> EdgeId
+labelOf (Edge l _ _) = l
+
+--get the nodes of a edge
 nodesOf :: Edge -> [NodeId]
-nodesOf e = sort $ nds e
+nodesOf (Edge _ n _) = sort n
+
+--get the weight of a edge
+weightOf :: Edge -> Float
+weightOf (Edge _ _ w) = w
 
 --find all incident edges on a node
 incidentEdges :: NodeId -> Graph -> [Edge]
-incidentEdges n (Graph _ es) = filter (\(Edge _ x _) -> elem n x) es
-
+incidentEdges n (Graph _ es) = filter (\x -> elem n $ nodesOf x) es
 
 --find all adjacents nodes from a node
 neighbourNodes :: NodeId -> Graph -> [NodeId]
-neighbourNodes n graph = delete n ns
+neighbourNodes n graph = filter (n/=) ns
   where
     es = incidentEdges n graph
     ns = concat $ map nodesOf es
@@ -138,7 +146,7 @@ isAdjacentTo n n' graph = elem n' $ neighbourNodes n graph
 
 --verify if a edge is adjacent to a node
 isIncidentTo :: Edge -> NodeId -> Bool
-isIncidentTo e n = elem n $ nds e
+isIncidentTo e n = elem n $ nodesOf e
 
 --Verify if two edges are parallels
 isParallel :: Edge -> Edge -> Bool
@@ -150,8 +158,8 @@ notParallel e e' = (not $ isParallel e e')
 
 --verify if two edges are parallel, if true, verify if first is greater than second
 isParGT :: Edge -> Edge -> Bool
-isParGT e e' = isParallel e e' && val e > val e'
+isParGT e e' = isParallel e e' && weightOf e > weightOf e'
 
 --verify if two edges are parallel, if true, verify if first is lower than second
 isParLT :: Edge -> Edge -> Bool
-isParLT e e' = isParallel e e' && val e < val e'
+isParLT e e' = isParallel e e' && weightOf e < weightOf e'

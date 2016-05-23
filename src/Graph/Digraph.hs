@@ -13,11 +13,11 @@ type ArchId = Int
 
 --Data type for archs
 data Arch = Arch {
-                    lbl :: ArchId,
-                    src :: NodeId,
-                    tgt :: NodeId,
-                    val :: Float
-                  } deriving (Eq)
+                    label  :: ArchId,
+                    source :: NodeId,
+                    target :: NodeId,
+                    weight :: Float
+                  }
 
 --Exibition of archs
 instance Show Arch where
@@ -26,6 +26,9 @@ instance Show Arch where
 --Ordering of archs
 instance Ord Arch where
   compare (Arch l s t v) (Arch l' s' t' v') = compare (v,s,t) (v',s',t')
+
+instance Eq Arch where
+  (Arch _ s t v) == (Arch _ s' t' v') = (s,t,v) == (s',t',v')
 
 
 --Data type for Digraphs
@@ -58,23 +61,25 @@ insertNode :: NodeId -> Digraph -> Digraph
 insertNode n graph =
   if elem n ns then graph else Digraph (sort $ n:ns) es
   where
-    ns = nodes graph
-    es = archs graph
+    ns = getNodes graph
+    es = getArchs graph
 
---insert an arch in a graph
-insertArch :: (ArchId,NodeId,NodeId,Float) -> Digraph -> Digraph
-insertArch (l,s,t,v) graph =
+--insert an existant arch in a graph
+insertArch :: Arch -> Digraph -> Digraph
+insertArch a graph =
   if elem a as then graph else Digraph ns (sort $ a:as)
   where
-    ns = nodes graph
-    as = archs graph
-    a  = Arch l s t v
-
---remove a Arch from a digraph
-removeArch :: ArchId -> Digraph -> Digraph
-removeArch a (Digraph n as) = Digraph n as'
+    ns = getNodes graph
+    as = getArchs graph
+    
+--insert a new arch in a graph
+newArch :: (ArchId, NodeId, NodeId, Float) -> Digraph -> Digraph
+newArch (l,s,t,w) graph =
+  if elem e es then graph else Digraph ns (sort $ e:es)
   where
-    as' = filter (\x -> a /= lbl x) as
+    ns  = getNodes graph
+    es  = getArchs graph
+    e   = Arch l s t w
 
 --remove a node and the archs connected to it
 removeNode :: NodeId -> Digraph -> Digraph
@@ -83,37 +88,52 @@ removeNode n (Digraph ns a) = Digraph ns' a'
     ns' = delete n ns
     a'  = filter (\x -> n /= sourceOf x) a''
     a'' = filter (\x -> n /= targetOf x) a
+    
+--remove a Arch from a digraph
+removeArch :: ArchId -> Digraph -> Digraph
+removeArch a (Digraph n as) = Digraph n as'
+  where
+    as' = filter (\x -> a /= labelOf x) as
 
 ---------------------------------------------------------------------------------------
 getNodes :: Digraph -> [NodeId]
-getNodes g = sort $ nodes g
+getNodes (Digraph [] _) = error "Empty nodes Digraph"
+getNodes (Digraph n  _)  = sort n
 
 getArchs :: Digraph -> [Arch]
-getArchs g = sort $ archs g
+getArchs (Digraph _ a) = sort a
+
+--get the label of a arch
+labelOf :: Arch -> ArchId
+labelOf (Arch l _ _ _) = l
 
 --get the source of a arch
 sourceOf :: Arch -> NodeId
-sourceOf a = src a
+sourceOf (Arch _ s _ _) = s
 
 --get the target of a arch
 targetOf :: Arch -> NodeId
-targetOf a = tgt a
+targetOf (Arch _ _ t _) = t
+
+--get the weight of a arch
+weightOf :: Arch -> Float
+weightOf (Arch _ _ _ w) = w 
 
 --get the archs out of n
 archsFromNode :: NodeId -> Digraph -> [Arch]
-archsFromNode n (Digraph _ as) = sort $ filter (\x -> n == src x) as
+archsFromNode n (Digraph _ as) = sort $ filter (\x -> n == sourceOf x) as
 
 --get the archs in n
 archsIntoNode :: NodeId -> Digraph -> [Arch]
-archsIntoNode n (Digraph _ as) = sort $ filter (\x -> n == tgt x) as
+archsIntoNode n (Digraph _ as) = sort $ filter (\x -> n == targetOf x) as
 
---get the archs in or out in n
+--get the archs in or out on n
 incidentArchs :: NodeId -> Digraph -> [Arch]
-incidentArchs n (Digraph _ as) = sort $ filter (\x -> n == src x || n == tgt x) as
+incidentArchs n (Digraph _ as) = sort $ filter (\x -> n == sourceOf x || n == sourceOf x) as
 
 --get the adjacent nodes from n
 neighbourNodes :: NodeId -> Digraph -> [NodeId]
-neighbourNodes n g = sort $ map tgt (archsFromNode n g)
+neighbourNodes n g = sort $ map targetOf (archsFromNode n g)
 
 ---------------------------------------------------------------------------------------
 
