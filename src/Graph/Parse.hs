@@ -1,9 +1,8 @@
 module Graph.Parse where
 
+import           Data.List
 import           Graph.Digraph
 import qualified Graph.Graph as G
-import qualified Data.Set    as S
-
 
 txtDigraph :: String -> Digraph
 txtDigraph txt= do 
@@ -30,18 +29,14 @@ txtDigraph txt= do
   digraph'
 
 digraphToGraph :: Digraph -> G.Graph
-digraphToGraph digraph = G.Graph ns notParEs
+digraphToGraph digraph = graph'
   where
-    ns = nodes digraph
-    allEs = S.map archToEdge (archs digraph)
-    notParEs = removeParallel allEs allEs
-           
-    archToEdge :: Arch -> G.Edge
-    archToEdge (Arch l s t v) = G.Edge l (S.insert s $ S.insert t S.empty) v
+    graph = G.buildGraph (getNodes digraph) []
+    allEs = archToEdges  (getArchs digraph) graph
+    graph' = G.removeParallel allEs
+    
+    archToEdges :: [Arch] -> G.Graph -> G.Graph
+    archToEdges [] g = g
+    archToEdges ((Arch l s t v):ts) g = G.newEdge (l,s,t,v) (archToEdges ts g)
 
-    removeParallel :: S.Set G.Edge -> S.Set G.Edge -> S.Set G.Edge
-    removeParallel s set
-      | S.null s  = set
-      | otherwise = removeParallel es (S.filter (\x -> not $ G.isParLT e x) set)
-      where
-        (e,es) = S.deleteFindMin s
+
