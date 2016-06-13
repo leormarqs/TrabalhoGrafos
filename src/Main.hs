@@ -2,7 +2,8 @@ module Main where
 
 import Data.List
 import Graph.Parse
-import Graph.Digraph
+--import Graph.Digraph
+--import Graph.Graph
 import Graph.SpanningTree
 import Graph.DistTable
 

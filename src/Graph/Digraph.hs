@@ -25,10 +25,10 @@ instance Show Arch where
 
 --Ordering of archs
 instance Ord Arch where
-  compare (Arch l s t v) (Arch l' s' t' v') = compare (v,s,t) (v',s',t')
+  compare (Arch _ s t w) (Arch _  s' t' w') = compare (w,s,t) (w',s',t')
 
 instance Eq Arch where
-  (Arch _ s t v) == (Arch _ s' t' v') = (s,t,v) == (s',t',v')
+  (Arch _ s t w) == (Arch _ s' t' w') = (s,t,w) == (s',t',w')
 
 
 --Data type for Digraphs
@@ -141,7 +141,6 @@ neighbourNodes n g = sort $ map targetOf (archsFromNode n g)
 isAdjacentTo :: NodeId -> NodeId -> Digraph -> Bool
 isAdjacentTo n n' graph = elem n' $ neighbourNodes n graph
 
---verify if a edge is adjacent to a node
+--verify if a edge is incident to a node
 isIncidentTo :: Arch -> NodeId -> Bool
 isIncidentTo e n = targetOf e == n
-

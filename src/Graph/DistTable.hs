@@ -12,13 +12,19 @@ distTable digraph = allDist [] (getNodes digraph) [] digraph
 
 
 allDist :: [NodeId] -> [NodeId] -> [Dist] -> Digraph -> [Dist]
+
 allDist  _      []   dist  _   = dist
+
 allDist  []    open   _    g   = allDist [0] open' dist' g
   where
     open' = (filter (0/=) open)
     dist' = (0,Just 0): map (\x -> (x,Nothing)) open'
+
+
+
 allDist close  open  dist  g   = do
   let d = sort $ newDist close g dist
+
       mo = minimumOpen open d    
 
       minimumOpen :: [NodeId] -> [Dist] -> Maybe NodeId
@@ -28,8 +34,12 @@ allDist close  open  dist  g   = do
           isOpen (x,Just y)  = if elem x open then Just x else minimumOpen open ds
           isOpen (x,Nothing) = minimumOpen open ds
 
+
+
+  
       newDist :: [NodeId] -> Digraph -> [Dist] -> [Dist]
       newDist  []   _ dist = []
+
       newDist close g dist = do
         let new = concat $ map lambda close
               where

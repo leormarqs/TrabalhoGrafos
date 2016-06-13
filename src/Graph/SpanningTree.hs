@@ -7,16 +7,18 @@ import Graph.Graph
 spanningTree :: Graph -> Graph
 spanningTree g = spanning close open es (Graph n [])
   where
-    close  = [n']
-    open = ns
-    n@(n':ns) = getNodes g
-    es@(e:_)  = getEdges g
+    close       = [n']
+    n@(n':open) = getNodes g
+    es          = getEdges g
+
 
 
 spanning :: [NodeId] -> [NodeId] -> [Edge] -> Graph -> Graph
 spanning    _        []       _   graph = graph
 spanning close open edges graph = do
+
   let e = sort $ inOutEdges close open edges
+
       (s:t:_) = nodesOf (head e)
 
       (i,o)   = if elem s close
@@ -35,8 +37,8 @@ inOutEdges close@(n:ns)  open   edges = do
       es'    = filter (\x -> isInOut x close open) es
         
       isInOut :: Edge -> [NodeId] -> [NodeId] -> Bool
-      isInOut (Edge _ (s:t:_) _) i o =
-        ((elem s i) && (elem t o)) ||
-        ((elem s o) && (elem t i))
+      isInOut (Edge _ (s:t:_) _) close open =
+        ((elem s close) && (elem t open)) ||
+        ((elem s open) && (elem t close))
       
   es' ++ inOutEdges ns open edges

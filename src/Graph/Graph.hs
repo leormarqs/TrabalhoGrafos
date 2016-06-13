@@ -25,7 +25,7 @@ instance Show Edge where
 
 --Order of edges
 instance Ord Edge where
-  compare (Edge l n v) (Edge l' n' v') = compare (v,n) (v',n')
+  compare (Edge _ n v) (Edge _ n' v') = compare (v,n) (v',n')
 
 --Equality of Edges
 instance Eq Edge where
