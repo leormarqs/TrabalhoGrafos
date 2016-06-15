@@ -1,4 +1,7 @@
-module Graph.Parse where
+module Graph.Parse (
+  txtDigraph,
+  digraphToGraph
+  ) where
 
 import           Data.List
 import           Graph.Digraph
@@ -37,6 +40,10 @@ digraphToGraph digraph = graph'
     
     archToEdges :: [Arch] -> G.Graph -> G.Graph
     archToEdges [] g = g
-    archToEdges ((Arch l s t v):ts) g = G.newEdge (l,s,t,v) (archToEdges ts g)
-
+    archToEdges (a:as) g = G.newEdge (l,s,t,w) (archToEdges as g)
+      where
+        l = labelOf a
+        s = sourceOf a
+        t = targetOf a
+        w = weightOf a
 

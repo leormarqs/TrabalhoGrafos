@@ -1,4 +1,36 @@
-module Graph.Graph where
+module Graph.Graph (
+  Graph,
+  NodeId,
+  EdgeId,
+  Edge,
+
+  emptyGraph,
+  newGraph,
+  buildGraph,
+  insertNode,
+  insertEdge,
+  newEdge,
+  removeNode,
+  removeEdge,
+  removeParallel,
+
+  getNodes,
+  getEdges,
+
+  labelOf,
+  nodesOf,
+  weightOf,
+
+  incidentEdges,
+  neighbourNodes,
+
+  isAdjacentTo,
+  isIncidentTo,
+  isParallel,
+  notParallel,
+  isParGT,
+  isParLT
+  ) where
 
 ---------------------------------------------------------------------------------------
 
@@ -21,11 +53,11 @@ data Edge = Edge {
 
 --Exibition of edges
 instance Show Edge where
-  show (Edge l (s:t:[]) v) = " " ++ show s ++ "-(" ++ show v ++ ")-" ++ show t ++ " "
+  show (Edge l (s:t:[]) v) = " " ++ show s ++ "--" ++ show t ++ "(" ++ show v ++ ")\n"
 
 --Order of edges
 instance Ord Edge where
-  compare (Edge l n v) (Edge l' n' v') = compare (v,n) (v',n')
+  compare (Edge _ n v) (Edge _ n' v') = compare (v,n) (v',n')
 
 --Equality of Edges
 instance Eq Edge where
@@ -40,7 +72,7 @@ data Graph = Graph {
 
 --Exibition of Graphs
 instance Show Graph where
-  show (Graph n e) = "Graph:\nNodes: " ++ show n ++ "\nEdges: " ++ show e
+  show (Graph n e) = "Nodes:\n" ++ show n ++ "\nEdges:\n" ++ show e
 
 ---------------------------------------------------------------------------------------
 
@@ -49,9 +81,14 @@ emptyGraph :: Graph
 emptyGraph = Graph [] []
 
 --build a graph with pre-instantiated nodes and/or edges
-buildGraph :: [NodeId] -> [(EdgeId, NodeId, NodeId,  Float)] -> Graph
-buildGraph [] _ = error "Nodes list empty."
-buildGraph n e  = Graph (sort n) (sort $ buildEdges e)
+buildGraph :: [NodeId] -> [Edge] -> Graph
+buildGraph [] _ = error "Nodes list empty"
+buildGraph n e = Graph (sort n) (sort e)
+
+--build a graph with new nodes and/or edges
+newGraph :: [NodeId] -> [(EdgeId, NodeId, NodeId,  Float)] -> Graph
+newGraph [] _ = error "Nodes list empty."
+newGraph n e  = Graph (sort n) (sort $ buildEdges e)
   where
     buildEdges :: [(EdgeId, NodeId, NodeId, Float)] -> [Edge]
     buildEdges [] = []
@@ -144,7 +181,7 @@ neighbourNodes n graph = filter (n/=) ns
 isAdjacentTo :: NodeId -> NodeId -> Graph -> Bool
 isAdjacentTo n n' graph = elem n' $ neighbourNodes n graph
 
---verify if a edge is adjacent to a node
+--verify if a edge is incident to a node
 isIncidentTo :: Edge -> NodeId -> Bool
 isIncidentTo e n = elem n $ nodesOf e
 
