@@ -124,7 +124,7 @@ removeNode :: NodeId -> Graph -> Graph
 removeNode n (Graph ns es) = Graph ns' es'
   where
     ns' = filter (n /=) ns
-    es' = filter (not . elem n . nodesOf) es
+    es' = filter (notElem n . nodesOf) es
 
 --remove a edge from a graph
 removeEdge :: EdgeId -> Graph -> Graph
@@ -136,10 +136,7 @@ removeEdge e (Graph ns es) = Graph ns es'
 removeParallel :: Graph -> Graph
 removeParallel (Graph n es) = Graph n (sort es')
   where
-    es' = removePar es es
-    removePar :: [Edge] -> [Edge] -> [Edge]
-    removePar [] e' = e'
-    removePar (e:t) e' = removePar t (filter (\x -> not $ isParLT e x) e')
+    es' = foldl (\ x y -> filter (not . isParLT y) x ) es es
 
 
 ---------------------------------------------------------------------------------------
