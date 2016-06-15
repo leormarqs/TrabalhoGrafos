@@ -6,7 +6,8 @@ import Data.List
 import Graph.Graph
 
 --Initialize the Minimum Spanning Tree Calc
-spanningTree :: Graph -> Graph
+--Return Nothing if g is disconnected
+spanningTree :: Graph -> Maybe Graph
 spanningTree g = spanning close open es (newGraph n [])
   where
     close       = [n']
@@ -14,8 +15,9 @@ spanningTree g = spanning close open es (newGraph n [])
     es          = getEdges g
 
 --Implement the Prim's Algorithm
-spanning :: [NodeId] -> [NodeId] -> [Edge] -> Graph -> Graph
-spanning    _        []       _   graph = graph
+--Return Nothing if graph is disconnected
+spanning :: [NodeId] -> [NodeId] -> [Edge] -> Graph -> Maybe Graph
+spanning    _        []       _   graph = Just graph
 spanning close open edges graph = do
   let
     --get all open/close edges
@@ -28,7 +30,7 @@ spanning close open edges graph = do
                 else (s:close , delete s open)
 
   if null e
-    then error "Disconnected Graph"
+    then Nothing --Disconnected Graph
     else spanning cls opn edges (insertEdge (head e) graph)
 
 --get all edges that connects a closed node with a open node
