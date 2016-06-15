@@ -1,4 +1,34 @@
-module Graph.Digraph where
+module Graph.Digraph (
+  NodeId,
+  ArchId,
+  Arch,
+  Digraph,
+
+  emptyDigraph,
+  buildDigraph,
+  newDigraph,
+  insertNode,
+  insertArch,
+  newArch,
+  removeNode,
+  removeArch,
+
+  getNodes,
+  getArchs,
+
+  labelOf,
+  sourceOf,
+  targetOf,
+  weightOf,
+
+  archsFromNode,
+  archsIntoNode,
+  incidentArchs,
+  neighbourNodes,
+
+  isAdjacentTo,
+  isIncidentTo
+  )where
 
 ---------------------------------------------------------------------------------------
 
@@ -21,7 +51,7 @@ data Arch = Arch {
 
 --Exibition of archs
 instance Show Arch where
-  show (Arch n s t v) = " " ++ show s ++ "-(" ++ show v ++ ")->" ++ show t ++ " "
+  show (Arch n s t v) = " " ++ show s ++ "-->" ++ show t ++ "(" ++ show v ++ ")\n"
 
 --Ordering of archs
 instance Ord Arch where
@@ -39,7 +69,7 @@ data Digraph = Digraph {
 
 --Exibition of Digraphs
 instance Show Digraph where
-  show (Digraph n a) = "Digraph:\nNodes: " ++ show n ++ "\nArchs: " ++ show a
+  show (Digraph n a) = "Nodes:\n" ++ show n ++ "\nArchs:\n" ++ show a
 
 ---------------------------------------------------------------------------------------
 
@@ -48,9 +78,14 @@ emptyDigraph :: Digraph
 emptyDigraph = Digraph [] []
 
 --build a graph with pre-instantiated nodes and/or archs
-buildDigraph :: [NodeId] -> [(ArchId, NodeId, NodeId, Float)] -> Digraph
+buildDigraph :: [NodeId] -> [Arch] -> Digraph
 buildDigraph [] _ = error "Nodes list empty."
-buildDigraph n e  = Digraph (sort n) (sort $ buildArchs e)
+buildDigraph n a  = Digraph (sort n) (sort a)
+
+--build a graph with new nodes and/or archs
+newDigraph :: [NodeId] -> [(ArchId, NodeId, NodeId, Float)] -> Digraph
+newDigraph [] _ = error "Nodes list empty."
+newDigraph n e  = Digraph (sort n) (sort $ buildArchs e)
   where
     buildArchs :: [(ArchId, NodeId, NodeId, Float)] -> [Arch]
     buildArchs [] = []

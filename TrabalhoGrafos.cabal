@@ -32,5 +32,6 @@ executable TrabalhoGrafos
                 Graph.Graph
                 Graph.Digraph
                 Graph.SpanningTree
+                Graph.DistTable
 
                 
