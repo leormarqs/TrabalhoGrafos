@@ -26,7 +26,7 @@ main = do
 
   putStr "\nÁrvore Geradora Mínima:\n"
   case mst of
-    Nothing -> print "Grafo Disconexo"
+    Nothing -> putStr "Grafo Desconexo, impossível calcular Árvore Geradora Mínima.\n"
     Just x  -> print x
 
   putStr "\nTabela de distâncias a partir do nodo 0:\n"

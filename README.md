@@ -32,3 +32,5 @@ Será solicitado o caminho para o arquivo de entrada contendo o digrafo, após i
 calculará e exibira, o digrafo representado no arquivo fornecido, seu pseudografo subjacente,
 a arvore geradora minima do pseudografo   subjacente e também a tabela de distancias de todos
 os nodos partindo do nodo 0.
+Os grafos presentes na pasta "./tests" são alguns casos de uso, os arquivos "./tests/g1.txt",
+"./tests/g2.txt" e "./tests/g3.txt" respresentamos grafos mostrados na imagem "./tests/tests_g1_g2_g3.png"
