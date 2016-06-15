@@ -20,6 +20,12 @@ instance {-# OVERLAPPING #-} Show Dist where
   show (a,Just b) = " | d(0," ++ show a ++ ") | " ++ show b ++ " |\n"
   show (a,Nothing)= " | d(0," ++ show a ++ ") |  ∞  |\n"
 
+instance {-# OVERLAPPING #-} Ord Dist where
+  compare (a, Just b)  (c, Just d)  = compare (b,a) (d,c)
+  compare (a, Nothing) (c, Just d)  = GT
+  compare (a, Just b)  (c, Nothing) = LT
+  compare (a, Nothing) (c, Nothing) = compare a c
+
 ---------------------------------------------------------------------------
 
 --Initialize Distance Table Calc
@@ -64,12 +70,6 @@ allDist close  open  dist  g   = do
                              then (x, Just w)
                              else (x,Nothing)
 
-    --Get distances to a all neighbour from a specific node
-    distNeighbours :: NodeId -> Maybe Float -> Digraph -> [Dist]
-    distNeighbours n (Just d) digraph = map lambda $ archsFromNode n digraph
-      where
-        lambda x = (targetOf x, Just (d + weightOf x))
-
     --Find new distances to refresh the distance table 
     newDist :: [NodeId] -> Digraph -> [Dist] -> [Dist]
     newDist  []   _ dist = []
@@ -78,6 +78,11 @@ allDist close  open  dist  g   = do
         new = concatMap (\x -> distNeighbours x (lkup x) g) close
         lkup x = fromJust $ lookup x dist
 
+        --Get distances to a all neighbour from a specific node
+        distNeighbours :: NodeId -> Maybe Float -> Digraph -> [Dist]
+        distNeighbours n (Just d) digraph = map lambda $ archsFromNode n digraph
+          where
+            lambda x = (targetOf x, Just (d + weightOf x))
 
     --Find the new distances
     d = sort $ newDist close g dist
