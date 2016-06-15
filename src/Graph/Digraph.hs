@@ -89,12 +89,12 @@ newDigraph n e  = Digraph (sort n) (sort $ buildArchs e)
   where
     buildArchs :: [(ArchId, NodeId, NodeId, Float)] -> [Arch]
     buildArchs [] = []
-    buildArchs ((l,s,t,v):ts) = (Arch l s t v) : (buildArchs ts)
+    buildArchs ((l,s,t,v):ts) = Arch l s t v : buildArchs ts
 
 --insert a node in a graph
 insertNode :: NodeId -> Digraph -> Digraph
 insertNode n graph =
-  if elem n ns then graph else Digraph (sort $ n:ns) es
+  if n `elem` ns then graph else Digraph (sort $ n:ns) es
   where
     ns = getNodes graph
     es = getArchs graph
@@ -102,15 +102,15 @@ insertNode n graph =
 --insert an existant arch in a graph
 insertArch :: Arch -> Digraph -> Digraph
 insertArch a graph =
-  if elem a as then graph else Digraph ns (sort $ a:as)
+  if a `elem` as then graph else Digraph ns (sort $ a:as)
   where
     ns = getNodes graph
     as = getArchs graph
-    
+
 --insert a new arch in a graph
 newArch :: (ArchId, NodeId, NodeId, Float) -> Digraph -> Digraph
 newArch (l,s,t,w) graph =
-  if elem e es then graph else Digraph ns (sort $ e:es)
+  if e `elem` es then graph else Digraph ns (sort $ e:es)
   where
     ns  = getNodes graph
     es  = getArchs graph
@@ -123,7 +123,7 @@ removeNode n (Digraph ns a) = Digraph ns' a'
     ns' = delete n ns
     a'  = filter (\x -> n /= sourceOf x) a''
     a'' = filter (\x -> n /= targetOf x) a
-    
+
 --remove a Arch from a digraph
 removeArch :: ArchId -> Digraph -> Digraph
 removeArch a (Digraph n as) = Digraph n as'
@@ -152,7 +152,7 @@ targetOf (Arch _ _ t _) = t
 
 --get the weight of a arch
 weightOf :: Arch -> Float
-weightOf (Arch _ _ _ w) = w 
+weightOf (Arch _ _ _ w) = w
 
 --get the archs out of n
 archsFromNode :: NodeId -> Digraph -> [Arch]

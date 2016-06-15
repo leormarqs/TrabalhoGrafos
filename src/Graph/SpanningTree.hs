@@ -23,14 +23,14 @@ spanning close open edges graph = do
     --get nodes of the lower open/close edge
     (s:t:_)   = nodesOf (head e)
     --close nodes properly
-    (cls,opn) = if elem s close
+    (cls,opn) = if s `elem` close
                 then (t:close , delete t open)
                 else (s:close , delete s open)
 
   if null e
     then error "Disconnected Graph"
     else spanning cls opn edges (insertEdge (head e) graph)
-         
+
 --get all edges that connects a closed node with a open node
 openCloseEdges :: [NodeId] -> [NodeId] -> [Edge] -> [Edge]
 openCloseEdges    []          _       _   = []
@@ -41,7 +41,7 @@ openCloseEdges close@(n:ns)  open   edges = do
       --verify if a edge connects a closed node with a open node
       isOpenClose :: [NodeId] -> [NodeId] -> [NodeId] -> Bool
       isOpenClose (s:t:_) close open =
-        ((elem s close) && (elem t open)) ||
-        ((elem s open) && (elem t close))
-      
+        (elem s close && elem t open) ||
+        (elem s open && elem t close)
+
   es' ++ openCloseEdges ns open edges
