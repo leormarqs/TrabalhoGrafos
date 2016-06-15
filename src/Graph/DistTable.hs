@@ -35,7 +35,7 @@ allDist  _      []   dist  _   = dist
 --Initialize DistTable with "infinity" values
 allDist  []    open   _    g   = allDist [0] open' dist' g
   where
-    open' = (filter (0/=) open)
+    open' = filter (0/=) open
     dist' = (0,Just 0): map (\x -> (x,Nothing)) open'
 
 --Calculate the dist table
@@ -47,7 +47,7 @@ allDist close  open  dist  g   = do
     minimumOpen open   []   = Nothing
     minimumOpen open (d:ds) = isOpen d
         where
-          isOpen (x,Just y)  = if elem x open then Just x else minimumOpen open ds
+          isOpen (x,Just y)  = if x `elem` open then Just x else minimumOpen open ds
           isOpen (x,Nothing) = minimumOpen open ds
 
     --Refresh the distance table if some lower distance was found
@@ -68,21 +68,21 @@ allDist close  open  dist  g   = do
     distNeighbours :: NodeId -> Maybe Float -> Digraph -> [Dist]
     distNeighbours n (Just d) digraph = map lambda $ archsFromNode n digraph
       where
-        lambda = (\x -> (targetOf x, Just (d + weightOf x)))
+        lambda x = (targetOf x, Just (d + weightOf x))
 
     --Find new distances to refresh the distance table 
     newDist :: [NodeId] -> Digraph -> [Dist] -> [Dist]
     newDist  []   _ dist = []
     newDist close g dist = refreshDist new dist
       where
-        new = concat $ map (\x -> distNeighbours x (lkup x) g) close
-        lkup x = fromJust $ lookup x dist   
+        new = concatMap (\x -> distNeighbours x (lkup x) g) close
+        lkup x = fromJust $ lookup x dist
 
 
     --Find the new distances
     d = sort $ newDist close g dist
     --Find the node with minimum distance not closed
-    mo = minimumOpen open d    
+    mo = minimumOpen open d
 
   case mo of
     --All connected nodes are closed, return the final table

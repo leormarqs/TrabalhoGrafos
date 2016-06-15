@@ -53,7 +53,7 @@ data Edge = Edge {
 
 --Exibition of edges
 instance Show Edge where
-  show (Edge l (s:t:[]) v) = " " ++ show s ++ "--" ++ show t ++ "(" ++ show v ++ ")\n"
+  show (Edge l [s, t] v) = " " ++ show s ++ "--" ++ show t ++ "(" ++ show v ++ ")\n"
 
 --Order of edges
 instance Ord Edge where
@@ -92,12 +92,12 @@ newGraph n e  = Graph (sort n) (sort $ buildEdges e)
   where
     buildEdges :: [(EdgeId, NodeId, NodeId, Float)] -> [Edge]
     buildEdges [] = []
-    buildEdges ((l,s,t,v):ts) = (Edge l (sort $ [s,t]) v) : buildEdges ts 
+    buildEdges ((l,s,t,v):ts) = Edge l (sort [s,t]) v : buildEdges ts
 
 --insert a node in a graph
 insertNode :: NodeId -> Graph -> Graph
 insertNode n graph =
-  if elem n ns then graph else Graph (sort $ n:ns) es
+  if n `elem` ns then graph else Graph (sort $ n:ns) es
   where
     ns = getNodes graph
     es = getEdges graph
@@ -105,7 +105,7 @@ insertNode n graph =
 --insert a existant edge in a graph
 insertEdge :: Edge -> Graph -> Graph
 insertEdge e graph =
-  if elem e es then graph else Graph ns (sort $ e:es)
+  if e `elem` es then graph else Graph ns (sort $ e:es)
   where
     ns  = getNodes graph
     es  = getEdges graph
@@ -113,18 +113,18 @@ insertEdge e graph =
 --insert a new edge in a graph
 newEdge :: (EdgeId, NodeId, NodeId, Float) -> Graph -> Graph
 newEdge (l,s,t,v) graph =
-  if elem e es then graph else Graph ns (sort $ e:es)
+  if e `elem` es then graph else Graph ns (sort $ e:es)
   where
     ns  = getNodes graph
     es  = getEdges graph
-    e   = Edge l (sort $ [s,t]) v
+    e   = Edge l (sort [s,t]) v
 
 --remove a node and edges connected to it from a graph
 removeNode :: NodeId -> Graph -> Graph
 removeNode n (Graph ns es) = Graph ns' es'
   where
     ns' = filter (n /=) ns
-    es' = filter (\x -> not $ elem n (nodesOf x)) es
+    es' = filter (not . elem n . nodesOf) es
 
 --remove a edge from a graph
 removeEdge :: EdgeId -> Graph -> Graph
@@ -166,14 +166,14 @@ weightOf (Edge _ _ w) = w
 
 --find all incident edges on a node
 incidentEdges :: NodeId -> Graph -> [Edge]
-incidentEdges n (Graph _ es) = filter (\x -> elem n $ nodesOf x) es
+incidentEdges n (Graph _ es) = filter (elem n . nodesOf) es
 
 --find all adjacents nodes from a node
 neighbourNodes :: NodeId -> Graph -> [NodeId]
 neighbourNodes n graph = filter (n/=) ns
   where
     es = incidentEdges n graph
-    ns = concat $ map nodesOf es
+    ns = concatMap nodesOf es
 
 ---------------------------------------------------------------------------------------
 
@@ -191,7 +191,7 @@ isParallel (Edge _ n _) (Edge _ n' _)  = n == n'
 
 --Verify if two edges aren't parallels
 notParallel :: Edge -> Edge -> Bool
-notParallel e e' = (not $ isParallel e e')
+notParallel e e' = not $ isParallel e e'
 
 --verify if two edges are parallel, if true, verify if first is greater than second
 isParGT :: Edge -> Edge -> Bool
