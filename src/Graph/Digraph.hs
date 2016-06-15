@@ -1,4 +1,34 @@
-module Graph.Digraph where
+module Graph.Digraph (
+  NodeId,
+  ArchId,
+  Arch,
+  Digraph,
+
+  emptyDigraph,
+  buildDigraph,
+  newDigraph,
+  insertNode,
+  insertArch,
+  newArch,
+  removeNode,
+  removeArch,
+
+  getNodes,
+  getArchs,
+
+  labelOf,
+  sourceOf,
+  targetOf,
+  weightOf,
+
+  archsFromNode,
+  archsIntoNode,
+  incidentArchs,
+  neighbourNodes,
+
+  isAdjacentTo,
+  isIncidentTo
+  )where
 
 ---------------------------------------------------------------------------------------
 
@@ -21,14 +51,14 @@ data Arch = Arch {
 
 --Exibition of archs
 instance Show Arch where
-  show (Arch n s t v) = " " ++ show s ++ "-(" ++ show v ++ ")->" ++ show t ++ " "
+  show (Arch n s t v) = " " ++ show s ++ "-->" ++ show t ++ "(" ++ show v ++ ")\n"
 
 --Ordering of archs
 instance Ord Arch where
-  compare (Arch l s t v) (Arch l' s' t' v') = compare (v,s,t) (v',s',t')
+  compare (Arch _ s t w) (Arch _  s' t' w') = compare (w,s,t) (w',s',t')
 
 instance Eq Arch where
-  (Arch _ s t v) == (Arch _ s' t' v') = (s,t,v) == (s',t',v')
+  (Arch _ s t w) == (Arch _ s' t' w') = (s,t,w) == (s',t',w')
 
 
 --Data type for Digraphs
@@ -39,7 +69,7 @@ data Digraph = Digraph {
 
 --Exibition of Digraphs
 instance Show Digraph where
-  show (Digraph n a) = "Digraph:\nNodes: " ++ show n ++ "\nArchs: " ++ show a
+  show (Digraph n a) = "Nodes:\n" ++ show n ++ "\nArchs:\n" ++ show a
 
 ---------------------------------------------------------------------------------------
 
@@ -48,18 +78,23 @@ emptyDigraph :: Digraph
 emptyDigraph = Digraph [] []
 
 --build a graph with pre-instantiated nodes and/or archs
-buildDigraph :: [NodeId] -> [(ArchId, NodeId, NodeId, Float)] -> Digraph
+buildDigraph :: [NodeId] -> [Arch] -> Digraph
 buildDigraph [] _ = error "Nodes list empty."
-buildDigraph n e  = Digraph (sort n) (sort $ buildArchs e)
+buildDigraph n a  = Digraph (sort n) (sort a)
+
+--build a graph with new nodes and/or archs
+newDigraph :: [NodeId] -> [(ArchId, NodeId, NodeId, Float)] -> Digraph
+newDigraph [] _ = error "Nodes list empty."
+newDigraph n e  = Digraph (sort n) (sort $ buildArchs e)
   where
     buildArchs :: [(ArchId, NodeId, NodeId, Float)] -> [Arch]
     buildArchs [] = []
-    buildArchs ((l,s,t,v):ts) = (Arch l s t v) : (buildArchs ts)
+    buildArchs ((l,s,t,v):ts) = Arch l s t v : buildArchs ts
 
 --insert a node in a graph
 insertNode :: NodeId -> Digraph -> Digraph
 insertNode n graph =
-  if elem n ns then graph else Digraph (sort $ n:ns) es
+  if n `elem` ns then graph else Digraph (sort $ n:ns) es
   where
     ns = getNodes graph
     es = getArchs graph
@@ -67,15 +102,15 @@ insertNode n graph =
 --insert an existant arch in a graph
 insertArch :: Arch -> Digraph -> Digraph
 insertArch a graph =
-  if elem a as then graph else Digraph ns (sort $ a:as)
+  if a `elem` as then graph else Digraph ns (sort $ a:as)
   where
     ns = getNodes graph
     as = getArchs graph
-    
+
 --insert a new arch in a graph
 newArch :: (ArchId, NodeId, NodeId, Float) -> Digraph -> Digraph
 newArch (l,s,t,w) graph =
-  if elem e es then graph else Digraph ns (sort $ e:es)
+  if e `elem` es then graph else Digraph ns (sort $ e:es)
   where
     ns  = getNodes graph
     es  = getArchs graph
@@ -88,7 +123,7 @@ removeNode n (Digraph ns a) = Digraph ns' a'
     ns' = delete n ns
     a'  = filter (\x -> n /= sourceOf x) a''
     a'' = filter (\x -> n /= targetOf x) a
-    
+
 --remove a Arch from a digraph
 removeArch :: ArchId -> Digraph -> Digraph
 removeArch a (Digraph n as) = Digraph n as'
@@ -117,7 +152,7 @@ targetOf (Arch _ _ t _) = t
 
 --get the weight of a arch
 weightOf :: Arch -> Float
-weightOf (Arch _ _ _ w) = w 
+weightOf (Arch _ _ _ w) = w
 
 --get the archs out of n
 archsFromNode :: NodeId -> Digraph -> [Arch]
@@ -141,7 +176,6 @@ neighbourNodes n g = sort $ map targetOf (archsFromNode n g)
 isAdjacentTo :: NodeId -> NodeId -> Digraph -> Bool
 isAdjacentTo n n' graph = elem n' $ neighbourNodes n graph
 
---verify if a edge is adjacent to a node
+--verify if a edge is incident to a node
 isIncidentTo :: Arch -> NodeId -> Bool
 isIncidentTo e n = targetOf e == n
-
