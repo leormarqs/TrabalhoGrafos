@@ -7,13 +7,14 @@
                                  Marcos Vinicios da Silva
                                  Valéria Soldera Girelli
 
-
-Instruções de Compilação / Execução:
+Disponível em: http://github.com/leormarqs/TrabalhoGrafos
 
 Este trabalho foi desenvolvido utilizando a linguagem de programação Haskell, em SO Linux,
-utilizandoa ferramenta Stack como gerenciador de projeto, portanto, deverá ser utilizado da
+utilizando a ferramenta Stack como gerenciador de projeto, portanto, deverá ser utilizado da
 seguinte maneira:
 
+  Instruções de Compilação / Execução:
+	 
   Para compilar, em linha de comando:
   
         --$ stack build
